@@ -1,2 +1,3 @@
 .idea/
-rconlog_config.py
+logs/
+modules/rconlog_config.py

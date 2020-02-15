@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 import argparse
-import textwrap
+from modules import rcon_log
 
 #                          RCON-based logger application
 #                          -----------------------------
@@ -13,7 +13,6 @@ import textwrap
 #                          cli - enter cli mode
 
 
-
 def create_parser():
     _parser = argparse.ArgumentParser(description='RCON-based logger application')
     _parser.add_argument('--mode', dest='mode', action='store',  nargs=1, required=True, default='stat',
@@ -22,9 +21,16 @@ def create_parser():
     return _parser
 
 
-if __name__ == '__main__':
+def main():
     parser = create_parser()
-    namespace = parser.parse_args()
+    ns = parser.parse_args()
+
+    rcon_log.logging.info('Parsed arguments: %s' % ns)
+
+
+if __name__ == '__main__':
+    main()
+
 
 # specification
 # rcon_monitor - вызывает rcon_client, обновляет БД
