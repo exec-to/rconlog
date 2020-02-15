@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 import argparse
-from modules import rcon_log
+from modules import rcon_log as logger
+from modules import process_manager
 
 #                          RCON-based logger application
 #                          -----------------------------
@@ -25,7 +26,10 @@ def main():
     parser = create_parser()
     ns = parser.parse_args()
 
-    rcon_log.logging.info('Parsed arguments: %s' % ns)
+    logger.logging.info('Starting rconlog in %s mode.', *ns.mode)
+
+    pm = process_manager.ProcessManager(*ns.mode)
+    pm.run()
 
 
 if __name__ == '__main__':
@@ -37,10 +41,13 @@ if __name__ == '__main__':
 # rcon_stat - модуль выводит статистику по своей работе
 # rcon_client - клиент rcon, получает данные от одного игрового сервера
 # rcon_control - flask-админка для управления
-# rcon_ipset - модуль для управления таблицами ipset
+# rcon_ipset - модуль для управления таблицами ipset (use wrapper module)
 # rcon_iptables - модуль для управления правилами iptables
 # rcon_firewall - модуль для управления фаерволлом
 # rcon_config - конфигурация наблюдаемых игровых серверов
 # rconlog_config - конфигурация приложения (БД, фаерволлы и т.п.)
 # rcon_log - модуль логгирования
+# cron_core
+# supervisord
+
 
