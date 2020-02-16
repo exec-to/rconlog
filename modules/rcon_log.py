@@ -6,4 +6,5 @@ from modules import rconlog_config
 
 logging.basicConfig(format = u'%(levelname)-8s [%(asctime)s] %(message)s',
                     level = logging.DEBUG,
-                    filename="%s/logs/rconlog.log" % rconlog_config.default['BASE_PATH'])
+                    filename="{BASE_PATH}/logs/rconlog.log"
+                    .format(BASE_PATH=rconlog_config.default['BASE_PATH']))

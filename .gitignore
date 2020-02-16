@@ -1,3 +1,4 @@
 .idea/
 logs/
+__pychache__/
 modules/rconlog_config.py

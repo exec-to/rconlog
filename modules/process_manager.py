@@ -3,6 +3,7 @@
 import operator
 from modules import rcon_core
 from sqlalchemy.orm import sessionmaker
+from modules import rcon_stat
 
 
 class ProcessManager:
@@ -15,7 +16,8 @@ class ProcessManager:
         operator.methodcaller(self._mode)(self)
 
     def stat(self):
-        print('run stat')
+        stat = rcon_stat.RconStat(self.core)
+        stat.getAll()
 
     def server(self):
         print('run server')
@@ -32,10 +34,10 @@ class ProcessManager:
         # print(user)
         # self.session.add(user)
         # self.session.commit()
-        user = self.session.query(rcon_core.User).filter_by(id='1').first()
-        print(user)
-        print(user.id)
-
+        update = self.session.query(rcon_core.Updates).filter_by(gamehost='109.237.110.151').first()
+        print(update.gamehost, update.gameport, update.ipaddr, update.created_at, update.rcon_server_id)
+        # print(user)
+        # print(user.id)
 
     def firewall(self):
         print('run firewall')
