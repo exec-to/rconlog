@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 import argparse
 from modules import rcon_log as logger
 from modules import process_manager
+import sys
 
 #                          RCON-based logger application
 #                          -----------------------------
@@ -25,9 +26,10 @@ def create_parser():
 def main():
     parser = create_parser()
     ns = parser.parse_args()
+    print(ns)
+    exit(0)
 
     logger.logging.info('Starting rconlog in %s mode.', *ns.mode)
-
     pm = process_manager.ProcessManager(*ns.mode)
     pm.run()
 
