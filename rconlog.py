@@ -26,8 +26,6 @@ def create_parser():
 def main():
     parser = create_parser()
     ns = parser.parse_args()
-    print(ns)
-    exit(0)
 
     logger.logging.info('Starting rconlog in %s mode.', *ns.mode)
     pm = process_manager.ProcessManager(*ns.mode)

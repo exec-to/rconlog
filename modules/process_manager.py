@@ -4,6 +4,7 @@ import operator
 from modules import rcon_core
 from sqlalchemy.orm import sessionmaker
 from modules import rcon_stat
+from test import Command
 
 
 class ProcessManager:
@@ -14,6 +15,9 @@ class ProcessManager:
 
     def run(self):
         operator.methodcaller(self._mode)(self)
+
+    def run_command(self, cmd):
+        print(cmd.command, cmd.host)
 
     def stat(self):
         stat = rcon_stat.RconStat(self.core)
