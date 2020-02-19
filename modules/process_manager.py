@@ -1,23 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-import operator
 from modules import rcon_core
 from sqlalchemy.orm import sessionmaker
 from modules import rcon_stat
-from test import Command
+from modules import rcon_log as logger
 
 
 class ProcessManager:
-    def __init__(self, mode):
+    def __init__(self, mode, args):
         self._mode = mode
+        self._args = args
         self.core = rcon_core.Core()
         self.session = sessionmaker(bind=self.core.engine)()
 
     def run(self):
-        operator.methodcaller(self._mode)(self)
-
-    def run_command(self, cmd):
-        print(cmd.command, cmd.host)
+        if hasattr(self, self._mode):
+            getattr(self, self._mode)()
+        else:
+            logger.logging.error('Can\'t find handler for {mode}'.format(mode=self._mode))
 
     def stat(self):
         stat = rcon_stat.RconStat(self.core)
@@ -34,6 +34,7 @@ class ProcessManager:
 
     def cli(self):
         print('run cli')
+        print(self._args)
         # user = rcon_core.User("u4372", True)
         # print(user)
         # self.session.add(user)
@@ -45,3 +46,4 @@ class ProcessManager:
 
     def firewall(self):
         print('run firewall')
+        print(self._args)

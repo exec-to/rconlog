@@ -4,6 +4,7 @@ import argparse
 from modules import rcon_log as logger
 from modules import process_manager
 import sys
+from modules.rcon_parser import RconParser as Parser
 
 #                          RCON-based logger application
 #                          -----------------------------
@@ -15,20 +16,11 @@ import sys
 #                          cli - enter cli mode
 
 
-def create_parser():
-    _parser = argparse.ArgumentParser(description='RCON-based logger application')
-    _parser.add_argument('--mode', dest='mode', action='store',  nargs=1, required=True, default='stat',
-                         choices={'server', 'monitor', 'firewall', 'web', 'stat', 'cli'},
-                         help='Run app in selected mode')
-    return _parser
-
-
 def main():
-    parser = create_parser()
-    ns = parser.parse_args()
+    parser = Parser()
 
-    logger.logging.info('Starting rconlog in %s mode.', *ns.mode)
-    pm = process_manager.ProcessManager(*ns.mode)
+    logger.logging.info('Starting rconlog in %s mode.', parser.mode)
+    pm = process_manager.ProcessManager(parser.mode, parser.args)
     pm.run()
 
 
