@@ -3,6 +3,8 @@
 import argparse
 import sys
 import getpass
+from ipaddress import ip_address
+from modules.rcon_api import RconAPI as api
 
 
 class RconParser(object):
@@ -33,25 +35,63 @@ class RconParser(object):
 
 
     def cli(self):
-        print('>> cli')
         parser = argparse.ArgumentParser(
-            description='Record changes to the repository')
+            description='RCON Logger command line interface')
         # prefixing the argument with -- means it's optional
-        parser.add_argument('command', help='Subcommand to run')
-        parser.add_argument('username', help='rcon username')
-        parser.add_argument('host', help='rcon host')
-        parser.add_argument('port', type=int, help='rcon port')
-        parser.add_argument('--proto', help='rcon protocol', default='tcp',  choices={'tcp', 'udp'})
+        commands_subparsers = parser.add_subparsers(help='Available commands', dest='command')
+
+        # - server ---------------------
+
+        cmd_server_sub = commands_subparsers.add_parser('server', help='RCON server')
+        cmd_server = cmd_server_sub.add_subparsers(help='Commands for RCON server control', dest='command2')
+
+        cmd_create = cmd_server.add_parser('create', help='Create RCON server')
+        cmd_create.add_argument('username', help='rcon username')
+        cmd_create.add_argument('host', help='rcon host', type=ip_address)
+        cmd_create.add_argument('port', type=int, help='rcon port')
+        cmd_create.add_argument('--proto', help='rcon protocol, default TCP', default='tcp',  choices={'tcp', 'udp'})
+        cmd_create.add_argument('--enabled', help='Enable, default disabled', action='store_true')
+
+        cmd_del = cmd_server.add_parser('del', help='Delete RCON server')
+        cmd_del.add_argument('id', help='rcon server id')
+
+        cmd_enable = cmd_server.add_parser('enable', help='Enable RCON server')
+        cmd_enable.add_argument('id', help='rcon server id')
+
+        cmd_disable = cmd_server.add_parser('disable', help='Disable RCON server')
+        cmd_disable.add_argument('id', help='rcon server id')
+
+        cmd_get = cmd_server.add_parser('get', help='Get RCON server')
+        cmd_get.add_argument('id', help='rcon server id')
+
+        cmd_list = cmd_server.add_parser('list', help='List RCON servers')
+        cmd_list.add_argument('--all', help='List all RCON servers', action='store_true', default=True)
+        cmd_list.add_argument('--enabled', help='List enabled RCON servers', action='store_true')
+        cmd_list.add_argument('--disabled', help='List disabled RCON servers', action='store_true')
+
+        # - firewall --------------------
+
+        cmd_firewall_sub = commands_subparsers.add_parser('firewall', help='RCON firewall')
+        cmd_firewall = cmd_firewall_sub.add_subparsers(help='Commands for RCON firewalls control', dest='command2')
+
+        # ---------------------
 
         args = parser.parse_args(sys.argv[3:])
 
-        passwd = getpass.getpass('Enter rcon_password: ')
-        passwd2 = getpass.getpass('Confirm rcon_password: ')
-        if passwd != passwd2:
-            print('Passwords not match.')
+        full_command = '{cmd2}_rcon_{cmd1}'.format(cmd1=args.command, cmd2=args.command2)
+        args.full_command = full_command
+
+        if not hasattr(api, full_command) or args.command2 is None:
+            print('Unrecognize command {cmd}'.format(cmd=args.command))
+            print('usage: rconcli.py server [-h] {create,del,enable,disable,get,list} ...')
             exit(1)
 
-        args.passwd = passwd
+        if args.command2 == 'create':
+            passwd = getpass.getpass('Enter rcon_password: ')
+            passwd2 = getpass.getpass('Confirm rcon_password: ')
+            if passwd != passwd2:
+                print('Passwords not match.')
+                exit(1)
+            args.passwd = passwd
+
         self.args = args
-
-

@@ -4,7 +4,7 @@ from modules import rcon_core
 from sqlalchemy.orm import sessionmaker
 from modules import rcon_stat
 from modules import rcon_log as logger
-
+from modules.rcon_api import RconAPI as api
 
 class ProcessManager:
     def __init__(self, mode, args):
@@ -33,16 +33,9 @@ class ProcessManager:
         print('run web')
 
     def cli(self):
-        print('run cli')
-        print(self._args)
-        # user = rcon_core.User("u4372", True)
-        # print(user)
-        # self.session.add(user)
-        # self.session.commit()
-        update = self.session.query(rcon_core.Updates).filter_by(gamehost='109.237.110.151').first()
-        print(update.gamehost, update.gameport, update.ipaddr, update.created_at, update.rcon_server_id)
-        # print(user)
-        # print(user.id)
+        cmd = self._args.full_command
+        data = getattr(api, cmd)(self.session, self._args)
+        getattr(api, 'print_{cmd}'.format(cmd=cmd))(data)
 
     def firewall(self):
         print('run firewall')
