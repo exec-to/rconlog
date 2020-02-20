@@ -6,6 +6,7 @@ from modules import rcon_stat
 from modules import rcon_log as logger
 from modules.rcon_api import RconAPI as api
 from modules.rcon_cli import RconCLI as cli
+from modules.rcon_mon import RconMonitor
 
 class ProcessManager:
     def __init__(self, mode, args):
@@ -29,6 +30,9 @@ class ProcessManager:
 
     def monitor(self):
         print('run monitor')
+        self._args.enabled = True
+        srv = api.list_rcon_server(self.session, self._args)
+        RconMonitor(srv)
 
     def web(self):
         print('run web')

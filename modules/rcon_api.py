@@ -5,10 +5,13 @@ from sqlalchemy import exc
 from modules import rcon_log as logger
 import getpass
 
+# TODO: Implement filters
+
 class RconAPI(object):
 
     @staticmethod
     def del_rcon_server(session, args):
+        s = None
         try:
             s = session.query(core.RconServer).filter_by(id=args.id).first()
             if s is not None:
@@ -93,16 +96,15 @@ class RconAPI(object):
 
     @staticmethod
     def list_rcon_server(session, args):
-
         servers = None
         try:
             servers = session.query(core.RconServer)
 
-            if args.enabled:
+            if hasattr(args, 'enabled') and args.enabled:
                 servers = servers.filter_by(enabled=True).all()
-            elif args.disabled:
+            elif hasattr(args, 'disabled') and args.disabled:
                 servers = servers.filter_by(enabled=False).all()
-            elif args.all:
+            else:
                 servers = servers.all()
         except Exception as e:
             logger.logging.error('Can\'t get RCON servers: {error}'.format(error=str(e)))

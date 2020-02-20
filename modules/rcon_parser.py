@@ -22,7 +22,8 @@ class RconParser(object):
         if hasattr(self, self.mode):
             getattr(self, self.mode)()
         else:
-            self.args = args = parser.parse_args(sys.argv[3:])
+            self.args = args # = parser.parse_args(sys.argv[3:])
+
 
 
     def stat(self):
