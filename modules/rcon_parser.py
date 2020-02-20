@@ -45,35 +45,43 @@ class RconParser(object):
         cmd_server_sub = commands_subparsers.add_parser('server', help='RCON server')
         cmd_server = cmd_server_sub.add_subparsers(help='Commands for RCON server control', dest='command2')
 
-        cmd_create = cmd_server.add_parser('create', help='Create RCON server')
-        cmd_create.add_argument('username', help='rcon username')
-        cmd_create.add_argument('host', help='rcon host', type=ip_address)
-        cmd_create.add_argument('port', type=int, help='rcon port')
-        cmd_create.add_argument('--proto', help='rcon protocol, default TCP', default='tcp',  choices={'tcp', 'udp'})
-        cmd_create.add_argument('--enabled', help='Enable, default disabled', action='store_true')
+        server_create = cmd_server.add_parser('create', help='Create RCON server')
+        server_create.add_argument('username', help='rcon username')
+        server_create.add_argument('host', help='rcon host', type=ip_address)
+        server_create.add_argument('port', type=int, help='rcon port')
+        server_create.add_argument('--proto', help='rcon protocol, default TCP', default='tcp',  choices={'tcp', 'udp'})
+        server_create.add_argument('--enabled', help='Enable, default disabled', action='store_true')
 
-        cmd_del = cmd_server.add_parser('del', help='Delete RCON server')
-        cmd_del.add_argument('id', help='rcon server id')
+        server_del = cmd_server.add_parser('del', help='Delete RCON server')
+        server_del.add_argument('id', help='rcon server id')
 
-        cmd_enable = cmd_server.add_parser('enable', help='Enable RCON server')
-        cmd_enable.add_argument('id', help='rcon server id')
+        server_enable = cmd_server.add_parser('enable', help='Enable RCON server')
+        server_enable.add_argument('id', help='rcon server id')
 
-        cmd_disable = cmd_server.add_parser('disable', help='Disable RCON server')
-        cmd_disable.add_argument('id', help='rcon server id')
+        server_disable = cmd_server.add_parser('disable', help='Disable RCON server')
+        server_disable.add_argument('id', help='rcon server id')
 
-        cmd_get = cmd_server.add_parser('get', help='Get RCON server')
-        cmd_get.add_argument('id', help='rcon server id')
+        server_get = cmd_server.add_parser('get', help='Get RCON server')
+        server_get.add_argument('id', help='rcon server id')
 
-        cmd_list = cmd_server.add_parser('list', help='List RCON servers')
-        cmd_list.add_argument('--all', help='List all RCON servers', action='store_true', default=True)
-        cmd_list.add_argument('--enabled', help='List enabled RCON servers', action='store_true')
-        cmd_list.add_argument('--disabled', help='List disabled RCON servers', action='store_true')
+        server_passwd = cmd_server.add_parser('passwd', help='Change password for RCON server')
+        server_passwd.add_argument('id', help='rcon server id')
+
+        server_list = cmd_server.add_parser('list', help='List RCON servers')
+        server_list.add_argument('--all', help='List all RCON servers', action='store_true', default=True)
+        server_list.add_argument('--enabled', help='List enabled RCON servers', action='store_true')
+        server_list.add_argument('--disabled', help='List disabled RCON servers', action='store_true')
 
         # - firewall --------------------
 
         cmd_firewall_sub = commands_subparsers.add_parser('firewall', help='RCON firewall')
         cmd_firewall = cmd_firewall_sub.add_subparsers(help='Commands for RCON firewalls control', dest='command2')
 
+        # firewall_create
+        # firewall_get
+        # firewall_del
+        # firewall_list
+        # etc
         # ---------------------
 
         args = parser.parse_args(sys.argv[3:])

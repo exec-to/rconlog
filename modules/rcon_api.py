@@ -3,60 +3,118 @@
 from modules import rcon_core as core
 from sqlalchemy import exc
 from modules import rcon_log as logger
+import getpass
 
 class RconAPI(object):
 
     @staticmethod
-    def create_rcon_server(self):
-        print('>> create_rcon_server')
-
-    @staticmethod
-    def del_rcon_server(self):
-        print('>> create_rcon_server')
+    def del_rcon_server(session, args):
+        try:
+            s = session.query(core.RconServer).filter_by(id=args.id).first()
+            if s is not None:
+                session.delete(s)
+                session.commit()
+        except Exception as e:
+            logger.logging.error('Can\'t delete RCON server: {error}'.format(error=str(e)))
+            print('Can\'t delete RCON server: {error}'.format(error=str(e)))
+            exit(1)
+        return 'Server {id} successful deleted'.format(id=s.id)
 
     # ------------------
 
     @staticmethod
     def get_rcon_server(session, args):
-        s = session.query(core.RconServer).filter_by(id=args.id).first()
+        s = None
+        try:
+            s = session.query(core.RconServer).filter_by(id=args.id).first()
+        except Exception as e:
+            logger.logging.error('Can\'t get RCON server: {error}'.format(error=str(e)))
+            print('Can\'t get RCON server: {error}'.format(error=str(e)))
+            exit(1)
         return s
 
+    # ------------------
+
     @staticmethod
-    def print_get_rcon_server(s):
-        if s is None:
-            print('Error: RCON Server not exist.')
-            return
-        print('RCON Server ID: {id}'.format(id=s.id))
-        print('Host: {host}:{port} ({proto}), User: {user}, Active: {state}'
-              .format(host=s.rcon_host, port=s.rcon_port, proto=s.rcon_proto, user=s.username, state=s.enabled))
-        print('--')
+    def passwd_rcon_server(session, args):
+        s = None
+        try:
+            s = session.query(core.RconServer).filter_by(id=args.id).first()
+
+            if not hasattr(args, 'passwd'):
+                passwd = getpass.getpass('Enter rcon_password: ')
+                passwd2 = getpass.getpass('Confirm rcon_password: ')
+                if passwd != passwd2:
+                    raise Exception('Passwords not match.')
+                args.passwd = passwd
+
+            s.rcon_password = args.passwd
+            session.commit()
+
+        except Exception as e:
+            logger.logging.error('Can\'t change password for RCON server: {error}'.format(error=str(e)))
+            print('Can\'t change password for RCON server: {error}'.format(error=str(e)))
+            exit(1)
+        return 'Password for server ID: {id} successful changed'.format(id=s.id)
+
+    # ------------------
+
+    @staticmethod
+    def enable_rcon_server(session, args):
+        s = None
+        try:
+            s = session.query(core.RconServer).filter_by(id=args.id).first()
+            s.enabled = True
+            session.commit()
+        except Exception as e:
+            logger.logging.error('Can\'t enable RCON server: {error}'.format(error=str(e)))
+            print('Can\'t enable RCON server: {error}'.format(error=str(e)))
+            exit(1)
+
+        return 'Server {id} successful enabled'.format(id=s.id)
+
+    # ------------------
+
+    @staticmethod
+    def disable_rcon_server(session, args):
+        s = None
+        try:
+            s = session.query(core.RconServer).filter_by(id=args.id).first()
+            s.enabled = False
+            session.commit()
+        except Exception as e:
+            logger.logging.error('Can\'t disable RCON server: {error}'.format(error=str(e)))
+            print('Can\'t disable RCON server: {error}'.format(error=str(e)))
+            exit(1)
+
+        return 'Server {id} successful disabled'.format(id=s.id)
 
     # ------------------
 
     @staticmethod
     def list_rcon_server(session, args):
-        servers = session.query(core.RconServer)
 
-        if args.enabled:
-            servers = servers.filter_by(enabled=True).all()
-        elif args.disabled:
-            servers = servers.filter_by(enabled=False).all()
-        elif args.all:
-            servers = servers.all()
+        servers = None
+        try:
+            servers = session.query(core.RconServer)
+
+            if args.enabled:
+                servers = servers.filter_by(enabled=True).all()
+            elif args.disabled:
+                servers = servers.filter_by(enabled=False).all()
+            elif args.all:
+                servers = servers.all()
+        except Exception as e:
+            logger.logging.error('Can\'t get RCON servers: {error}'.format(error=str(e)))
+            print('Can\'t get RCON servers: {error}'.format(error=str(e)))
+            exit(1)
 
         return servers
-
-    @staticmethod
-    def print_list_rcon_server(servers):
-        for s in servers:
-            RconAPI.print_get_rcon_server(s)
 
     # ------------------
 
     @staticmethod
     def create_rcon_server(session, args):
-        # TODO: add try catch
-
         try:
             server = core.RconServer(args.username,
                                      str(args.host),
@@ -66,19 +124,14 @@ class RconAPI(object):
                                      args.enabled)
             session.add(server)
             session.commit()
-        except exc.SQLAlchemyError as e:
+        except Exception as e:
             logger.logging.error('Can\'t create new RCON server: {error}'.format(error=str(e)))
             print('Can\'t create new RCON server: {error}'.format(error=str(e)))
             exit(1)
 
         return 'Created successful'
 
-    @staticmethod
-    def print_create_rcon_server(message):
-        print(message)
-
     # ------------------
-
 
 
 # RCON API Functions
