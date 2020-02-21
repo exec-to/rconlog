@@ -4,6 +4,7 @@ from modules import rcon_core as core
 from sqlalchemy import exc
 from modules import rcon_log as logger
 import getpass
+from sqlalchemy_filters import apply_filters
 
 # TODO: Implement filters
 
@@ -95,10 +96,14 @@ class RconAPI(object):
     # ------------------
 
     @staticmethod
-    def list_rcon_server(session, args):
+    def list_rcon_server(session, args, filter=None):
+        if filter is None:
+            filter = []
+
         servers = None
         try:
             servers = session.query(core.RconServer)
+            servers = apply_filters(servers, filter)
 
             if hasattr(args, 'enabled') and args.enabled:
                 servers = servers.filter_by(enabled=True).all()
@@ -134,6 +139,39 @@ class RconAPI(object):
         return 'Created successful'
 
     # ------------------
+
+    @staticmethod
+    def list_rcon_updates(session, args, filter):
+        if filter is None:
+            filter = []
+
+        updates = None
+        try:
+            updates = session.query(core.Updates)
+            updates = apply_filters(updates, filter)
+
+            updates = updates.all()
+        except Exception as e:
+            logger.logging.error('Can\'t get updates: {error}'.format(error=str(e)))
+            exit(1)
+
+        return updates
+
+    # TODO: Implement filter by array of conditions
+    @staticmethod
+    def get_rcon_update(session, args, _filter=None):
+        if _filter is None:
+            _filter = []
+        u = None
+        try:
+            u = session.query(core.Updates)
+            u = apply_filters(u, _filter)
+            u = u.first()
+        except Exception as e:
+            logger.logging.error('Can\'t get RCON server: {error}'.format(error=str(e)))
+            print('Can\'t get RCON update: {error}'.format(error=str(e)))
+            exit(1)
+        return u
 
 
 # RCON API Functions

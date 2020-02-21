@@ -24,6 +24,8 @@ class RconParser(object):
         else:
             self.args = args # = parser.parse_args(sys.argv[3:])
 
+        self.args.filter = []
+
 
 
     def stat(self):

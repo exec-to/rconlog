@@ -30,9 +30,8 @@ class ProcessManager:
 
     def monitor(self):
         print('run monitor')
-        self._args.enabled = True
-        srv = api.list_rcon_server(self.session, self._args)
-        RconMonitor(srv)
+        # argparse filter [stote_const] append filter
+        RconMonitor(self.session, self._args)
 
     def web(self):
         print('run web')

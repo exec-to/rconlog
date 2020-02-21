@@ -20,6 +20,23 @@ class RconCLI(object):
             RconCLI.get_rcon_server(s)
 
 
+    # @staticmethod
+    # def list_rcon_updates(updates):
+    #     for u in updates:
+    #         RconCLI.get_rcon_server(u)
+    #
+    #
+    # @staticmethod
+    # def get_rcon_update(u):
+    #     if u is None:
+    #         print('Error: RCON update not exist.')
+    #         return
+    #     print('RCON Server ID: {id}'.format(id=s.id))
+    #     print('Host: {host}:{port} ({proto}), User: {user}, Active: {state}'
+    #           .format(host=s.rcon_host, port=s.rcon_port, proto=s.rcon_proto, user=s.username, state=s.enabled))
+    #     print('--')
+
+
     @staticmethod
     def create_rcon_server(message):
         print(message)
