@@ -173,6 +173,24 @@ class RconAPI(object):
             exit(1)
         return u
 
+    @staticmethod
+    def create_rcon_update(session, args):
+        try:
+            update = core.Updates(
+                args.gamehost,
+                args.gameport,
+                args.ipaddr,
+                args.rcon_server_id)
+
+            session.add(update)
+            session.commit()
+        except Exception as e:
+            logger.logging.error('Can\'t create RCON update record: {error}'.format(error=str(e)))
+            print('Can\'t create RCON update record: {error}'.format(error=str(e)))
+            exit(1)
+
+        return 'Created successful'
+
 
 # RCON API Functions
 

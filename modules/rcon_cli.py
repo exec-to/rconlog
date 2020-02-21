@@ -8,10 +8,11 @@ class RconCLI(object):
         if s is None:
             print('Error: RCON Server not exist.')
             return
+        print('')
         print('RCON Server ID: {id}'.format(id=s.id))
         print('Host: {host}:{port} ({proto}), User: {user}, Active: {state}'
               .format(host=s.rcon_host, port=s.rcon_port, proto=s.rcon_proto, user=s.username, state=s.enabled))
-        print('--')
+        print('--'*30)
 
 
     @staticmethod

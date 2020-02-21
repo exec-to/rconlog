@@ -2,7 +2,9 @@
 # -*- coding: UTF-8 -*-
 from modules.rcon_api import RconAPI as api
 from modules.rcon_cli import RconCLI as cli
-
+from modules.rcon_client import utils
+from modules import rcon_log as logger
+from modules import rcon_core as core
 
 class RconMonitor():
     def __init__(self, session, args):
@@ -13,12 +15,29 @@ class RconMonitor():
         ]
 
         self.servers = api.list_rcon_server(self.session, self.args, _filter)
-        cli.list_rcon_server(self.servers)
 
-        _filter = [
-            {'field': 'rcon_server_id', 'op': '==', 'value': 1},
-            {'field': 'ipaddr', 'op': '==', 'value': '176.49.196.133'}
-        ]
-        update = api.get_rcon_update(self.session, self.args, _filter)
-        print (update.id)
-        # self.updates = api.list_rcon_updates(self.session, self.args)
+        for server in self.servers:
+            cli.get_rcon_server(server)
+            try:
+                ipv4_list = utils.get_ipv4_list(
+                    server.rcon_host,
+                    int(server.rcon_port),
+                    server.rcon_password,
+                    server.rcon_proto)
+
+            except Exception as e:
+                logger.logging.error('Critical error with RCON server {id}: {error}'.format(error=str(e),id=server.id))
+                continue
+
+            for ip in ipv4_list:
+                _filter = [
+                    {'field': 'gamehost', 'op': '==', 'value': server.rcon_host},
+                    {'field': 'gameport', 'op': '==', 'value': server.rcon_port},
+                    {'field': 'ipaddr', 'op': '==', 'value': ip},
+                ]
+
+                update = api.get_rcon_update(self.session, self.args, _filter)
+                if not update:
+                    update = core.Updates(server.rcon_host, server.rcon_port,ip,server.id)
+                    api.create_rcon_update(self.session, update)
+                    logger.logging.info('{ip} created'.format(ip = update.ipaddr, date=update.created_at))

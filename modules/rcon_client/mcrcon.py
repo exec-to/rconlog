@@ -63,16 +63,30 @@ def send_packet(sock, packet):
     sock.sendall(encode_packet(packet))
 
 
-def login(sock, password):
+def login(sock, password, proto):
     """
     Send a "login" packet to the server. Returns a boolean indicating whether
     the login was successful.
     """
+    state = {}
+    state['login'] = False
+    state['udp_data'] = None
 
-    send_packet(sock, Packet(0, 3, password.encode("utf8")))
-    packet = receive_packet(sock)
-    return packet.ident == 0
+    if proto == 'tcp':
+        send_packet(sock, Packet(0, 3, password.encode("utf8")))
+        packet = receive_packet(sock)
+        state['login'] = packet.ident == 0
 
+    elif proto == 'udp':
+        byte_array = bytearray([255, 255, 255, 255])
+        byte_array.extend(b"challenge rcon")
+        sock.send(byte_array)
+        data, _ = sock.recvfrom(4096)
+        state['login'] = data[:4] == b"\xFF\xFF\xFF\xFF"
+        if state['login']:
+            state['master_key'] = data[4:-2].decode("utf-8").split(' ')[2]
+
+    return state
 
 def command(sock, text):
     """
@@ -87,4 +101,22 @@ def command(sock, text):
         if packet.ident != 0:
             break
         response += packet.payload
+    return response.decode("utf8")
+
+def udp_command(sock, cmd, master_key, password):
+    """
+    Sends a "command" packet to the server. Returns the response as a string.
+    """
+    command = bytearray([255, 255, 255, 255])
+    command.extend(b"rcon ")
+    command.extend(master_key.encode())
+    command.extend(b" ")
+    command.extend(password.encode())
+    command.extend(b" ")
+    command.extend(cmd.encode())
+    sock.send(command)
+
+    recv, _ = sock.recvfrom(4096)
+    response = recv[5:-2]
+
     return response.decode("utf8")

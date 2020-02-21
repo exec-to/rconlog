@@ -23,6 +23,7 @@ class RconParser(object):
             getattr(self, self.mode)()
         else:
             self.args = args # = parser.parse_args(sys.argv[3:])
+            print(self.args)
 
         self.args.filter = []
 
@@ -35,6 +36,8 @@ class RconParser(object):
         args = parser.parse_args(sys.argv[3:])
         if args.verbose:
             print('>> verbose stat')
+
+        self.args = args
 
 
     def cli(self):
@@ -58,6 +61,7 @@ class RconParser(object):
         server_del = cmd_server.add_parser('del', help='Delete RCON server')
         server_del.add_argument('id', help='rcon server id')
 
+        # TODO: enable -all, disable --all
         server_enable = cmd_server.add_parser('enable', help='Enable RCON server')
         server_enable.add_argument('id', help='rcon server id')
 

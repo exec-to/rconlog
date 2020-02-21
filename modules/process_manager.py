@@ -30,7 +30,7 @@ class ProcessManager:
 
     def monitor(self):
         print('run monitor')
-        # argparse filter [stote_const] append filter
+        # TODO: argparse filter [stote_const] append filter
         RconMonitor(self.session, self._args)
 
     def web(self):
