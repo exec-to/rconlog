@@ -2,7 +2,7 @@ from modules.rcon_client import mcrcon
 import socket
 import re
 
-def get_ipv4_list(host, port, passwd, proto):
+def send_rcon_command(host, port, passwd, proto, cmd):
     sock = None
     if proto == 'tcp':
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -11,7 +11,6 @@ def get_ipv4_list(host, port, passwd, proto):
 
     sock.connect((host, port))
 
-    # TODO: Add Error handler
     try:
         # Log in
         data = mcrcon.login(sock, passwd, proto)
@@ -19,7 +18,7 @@ def get_ipv4_list(host, port, passwd, proto):
             print("Incorrect auth")
             return
 
-        request = 'status'
+        request = cmd
         response = ''
 
         if proto == 'tcp':
@@ -30,6 +29,11 @@ def get_ipv4_list(host, port, passwd, proto):
     finally:
         sock.close()
 
+    return response
+
+
+def get_ipv4_list(host, port, passwd, proto):
+    response = send_rcon_command(host, port, passwd, proto, 'status')
     ipv4_list = extract_ipv4(response, host)
     return ipv4_list
 

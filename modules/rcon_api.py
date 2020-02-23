@@ -5,6 +5,7 @@ from sqlalchemy import exc
 from modules import rcon_log as logger
 import getpass
 from sqlalchemy_filters import apply_filters
+from modules.rcon_client import utils
 
 # TODO: Implement filters
 
@@ -36,6 +37,35 @@ class RconAPI(object):
             print('Can\'t get RCON server: {error}'.format(error=str(e)))
             exit(1)
         return s
+
+    # ------------------
+
+    @staticmethod
+    def test_rcon_server(session, args):
+        s = None
+        try:
+            s = session.query(core.RconServer).filter_by(id=args.id).first()
+        except Exception as e:
+            logger.logging.error('Can\'t get RCON server: {error}'.format(error=str(e)))
+            print('Can\'t get RCON server: {error}'.format(error=str(e)))
+            exit(1)
+
+        stat = ''
+        try:
+            stat = utils.send_rcon_command(
+                s.rcon_host,
+                int(s.rcon_port),
+                s.rcon_password,
+                s.rcon_proto,
+                'status'
+            )
+        except Exception as e:
+            err_msg = 'Critical error with RCON server ID {id}: {error}'.format(error=str(e), id=s.id)
+            logger.logging.error(err_msg)
+            print(err_msg)
+            exit(1)
+
+        return stat
 
     # ------------------
 
@@ -141,7 +171,7 @@ class RconAPI(object):
     # ------------------
 
     @staticmethod
-    def list_rcon_updates(session, args, filter):
+    def list_rcon_updates(session, args, filter=None):
         if filter is None:
             filter = []
 
@@ -192,6 +222,168 @@ class RconAPI(object):
         return 'Created successful'
 
 
+    @staticmethod
+    def create_rcon_firewall(session, args):
+        try:
+            firewall = core.Firewall(
+                args.host,
+                args.name,
+                args.type,
+                args.enabled)
+
+            session.add(firewall)
+            session.commit()
+        except Exception as e:
+            msg_error = 'Can\'t create firewall: {error}'.format(error=str(e))
+            logger.logging.error(msg_error)
+            print(msg_error)
+            exit(1)
+
+        return 'Created successful'
+
+
+    @staticmethod
+    def del_rcon_firewall(session, args):
+        f = None
+        try:
+            f = session.query(core.Firewall).filter_by(id=args.id).first()
+            if f is not None:
+                session.delete(f)
+                session.commit()
+        except Exception as e:
+            msg_error = 'Can\'t delete firewall: {error}'.format(error=str(e))
+            logger.logging.error(msg_error)
+            print(msg_error)
+            exit(1)
+        return 'Server {id} successful deleted'.format(id=f.id)
+
+    # ------------------
+
+    @staticmethod
+    def get_rcon_firewall(session, args):
+        f = None
+        try:
+            f = session.query(core.Firewall).filter_by(id=args.id).first()
+        except Exception as e:
+            msg_error = 'Can\'t get firewall: {error}'.format(error=str(e))
+            logger.logging.error(msg_error)
+            print(msg_error)
+            exit(1)
+        return f
+
+
+    @staticmethod
+    def list_rcon_firewall(session, args, filter=None):
+        if filter is None:
+            filter = []
+
+        firewalls = None
+        try:
+            firewalls = session.query(core.Firewall)
+            firewalls = apply_filters(firewalls, filter)
+
+            updates = firewalls.all()
+        except Exception as e:
+            logger.logging.error('Can\'t get firewalls: {error}'.format(error=str(e)))
+            exit(1)
+
+        return firewalls
+    # ------------------
+
+    @staticmethod
+    def enable_rcon_firewall(session, args):
+        f = None
+        try:
+            f = session.query(core.Firewall).filter_by(id=args.id).first()
+            f.enabled = True
+            session.commit()
+        except Exception as e:
+            logger.logging.error('Can\'t enable RCON server: {error}'.format(error=str(e)))
+            print('Can\'t enable RCON server: {error}'.format(error=str(e)))
+            exit(1)
+
+        return 'Server {id} successful enabled'.format(id=f.id)
+
+    # ------------------
+
+    @staticmethod
+    def disable_rcon_firewall(session, args):
+        f = None
+        try:
+            f = session.query(core.Firewall).filter_by(id=args.id).first()
+            f.enabled = False
+            session.commit()
+        except Exception as e:
+            logger.logging.error('Can\'t disable RCON server: {error}'.format(error=str(e)))
+            print('Can\'t disable RCON server: {error}'.format(error=str(e)))
+            exit(1)
+
+        return 'Server {id} successful disabled'.format(id=f.id)
+
+
+    # -- Database methods
+    @staticmethod
+    def get_rcon_rule(session, args):
+        r = None
+        try:
+            r = session.query(core.FirewallRule).filter_by(id=args.id).first()
+        except Exception as e:
+            msg_error = 'Can\'t get firewall rule: {error}'.format(error=str(e))
+            logger.logging.error(msg_error)
+            print(msg_error)
+            exit(1)
+        return r
+
+    @staticmethod
+    def list_rcon_rule(session, args, filter=None):
+        if filter is None:
+            filter = []
+
+        rules = None
+        try:
+            rules = session.query(core.FirewallRule)
+            rules = apply_filters(rules, filter)
+
+            updates = rules.all()
+        except Exception as e:
+            logger.logging.error('Can\'t get firewalls: {error}'.format(error=str(e)))
+            exit(1)
+
+        return rules
+
+    @staticmethod
+    def sync_rcon_db(session, args):
+        # get updates
+        updates = RconAPI.list_rcon_updates(session, args)
+
+        # get rules
+        rules = RconAPI.list_rcon_rule(session,args)
+        rules_list = []
+        for rule in rules:
+            rules_list.append(rule.subnet)
+
+        # get RCON servers
+        servers = RconAPI.list_rcon_server(session, args)
+
+        # check subnet exist in firewall rules
+        for ip in updates:
+            subnet = '{}.0/24'.format('.'.join(str(ip.ipaddr).split('.')[:3]))
+            if not subnet in rules_list:
+                srv = next(server for server in servers if server.id == ip.rcon_server_id)
+                try:
+                    rule = core.FirewallRule(ip.gamehost,
+                                             ip.gameport,
+                                             srv.username,
+                                             subnet)
+                    session.add(rule)
+                    session.commit()
+                    logger.logging.info('Create subnet {}'.format(subnet))
+                except Exception as e:
+                    logger.logging.error('Can\'t synchronize database: {error}'.format(error=str(e)))
+                    exit(1)
+
+        print('Database successful synchronized')
+    # ------------------
 # RCON API Functions
 
 # create_rcon_server

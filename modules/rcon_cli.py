@@ -14,6 +14,10 @@ class RconCLI(object):
               .format(host=s.rcon_host, port=s.rcon_port, proto=s.rcon_proto, user=s.username, state=s.enabled))
         print('--'*30)
 
+    @staticmethod
+    def test_rcon_server(s):
+        print(s)
+
 
     @staticmethod
     def list_rcon_server(servers):
@@ -57,3 +61,42 @@ class RconCLI(object):
     @staticmethod
     def passwd_rcon_server(message):
         print(message)
+
+    # -- Firewall methods
+    @staticmethod
+    def create_rcon_firewall(message):
+        print(message)
+
+    @staticmethod
+    def del_rcon_firewall(message):
+        print(message)
+
+    @staticmethod
+    def enable_rcon_firewall(message):
+        print(message)
+
+    @staticmethod
+    def disable_rcon_firewall(message):
+        print(message)
+
+    @staticmethod
+    def get_rcon_firewall(f):
+        if f is None:
+            print('Error: Firewall not exist.')
+            return
+        print('')
+        print('Firewall ID: {id}'.format(id=f.id))
+        print('Host: {host}, name: {name}, type: {type}, active: {state}'
+              .format(host=f.host, name=f.name, type=f.type, state=f.enabled))
+        print('--' * 30)
+
+    @staticmethod
+    def list_rcon_firewall(firewalls):
+        for f in firewalls:
+            RconCLI.get_rcon_firewall(f)
+
+
+    # -- Database methods
+    @staticmethod
+    def sync_rcon_db(message):
+        pass

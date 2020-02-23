@@ -28,7 +28,6 @@ class RconParser(object):
         self.args.filter = []
 
 
-
     def stat(self):
         print('>> stat')
         parser = argparse.ArgumentParser(description='Get RCON statistics')
@@ -71,6 +70,9 @@ class RconParser(object):
         server_get = cmd_server.add_parser('get', help='Get RCON server')
         server_get.add_argument('id', help='rcon server id')
 
+        server_test = cmd_server.add_parser('test', help='Get status from RCON server')
+        server_test.add_argument('id', help='rcon server id')
+
         server_passwd = cmd_server.add_parser('passwd', help='Change password for RCON server')
         server_passwd.add_argument('id', help='rcon server id')
 
@@ -81,17 +83,47 @@ class RconParser(object):
 
         # - firewall --------------------
 
-        cmd_firewall_sub = commands_subparsers.add_parser('firewall', help='RCON firewall')
-        cmd_firewall = cmd_firewall_sub.add_subparsers(help='Commands for RCON firewalls control', dest='command2')
+        cmd_firewall_sub = commands_subparsers.add_parser('firewall', help='Firewall')
+        cmd_firewall = cmd_firewall_sub.add_subparsers(help='Commands for firewalls control', dest='command2')
 
         # firewall_create
-        # firewall_get
-        # firewall_del
-        # firewall_list
-        # etc
+        firewall_create = cmd_firewall.add_parser('create', help='Create Firewall')
+        firewall_create.add_argument('host', help='Firewall IP-address')
+        firewall_create.add_argument('name', help='Firewall name, format \'firewall_1\' from 1 to 16')
+        firewall_create.add_argument('--type', help='Firewall type', default='iptables', choices={'iptables', 'cisco_asa'})
+        firewall_create.add_argument('--enabled', help='Enable firewall, default disabled', action='store_true')
+
+        firewall_del = cmd_firewall.add_parser('del', help='Delete firewall')
+        firewall_del.add_argument('id', help='firewall id')
+
+        # TODO: enable -all, disable --all
+        firewall_enable = cmd_firewall.add_parser('enable', help='Enable firewall')
+        firewall_enable.add_argument('id', help='firewall id')
+
+        firewall_disable = cmd_firewall.add_parser('disable', help='Disable firewall')
+        firewall_disable.add_argument('id', help='firewall id')
+
+        firewall_get = cmd_firewall.add_parser('get', help='Get firewall')
+        firewall_get.add_argument('id', help='firewall id')
+
+        firewall_list = cmd_firewall.add_parser('list', help='List firewalls')
+        firewall_list.add_argument('--all', help='List all firewalls', action='store_true', default=True)
+        firewall_list.add_argument('--enabled', help='List enabled firewalls', action='store_true')
+        firewall_list.add_argument('--disabled', help='List disabled firewalls', action='store_true')
+
         # ---------------------
 
+        cmd_db_sub = commands_subparsers.add_parser('db', help='Database')
+        cmd_db = cmd_db_sub.add_subparsers(help='Operation with database', dest='command2')
+
+        db_sync = cmd_db.add_parser('sync', help='synchronize database')
+        db_sync.add_argument('--quiet', help='quiet mode')
+
         args = parser.parse_args(sys.argv[3:])
+
+        if not hasattr(args, 'command2'):
+            print('Use {} -h for print help'.format(sys.argv[0]))
+            exit(1)
 
         full_command = '{cmd2}_rcon_{cmd1}'.format(cmd1=args.command, cmd2=args.command2)
         args.full_command = full_command
@@ -101,7 +133,7 @@ class RconParser(object):
             print('usage: rconcli.py server [-h] {create,del,enable,disable,get,list} ...')
             exit(1)
 
-        if args.command2 == 'create':
+        if args.command == 'server' and args.command2 == 'create':
             passwd = getpass.getpass('Enter rcon_password: ')
             passwd2 = getpass.getpass('Confirm rcon_password: ')
             if passwd != passwd2:

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 from modules import rcon_core
 from sqlalchemy.orm import sessionmaker
@@ -7,6 +7,7 @@ from modules import rcon_log as logger
 from modules.rcon_api import RconAPI as api
 from modules.rcon_cli import RconCLI as cli
 from modules.rcon_mon import RconMonitor
+from modules.rcon_firewall import RconFirewall
 
 class ProcessManager:
     def __init__(self, mode, args):
@@ -42,5 +43,4 @@ class ProcessManager:
         getattr(cli, cmd)(data)
 
     def firewall(self):
-        print('run firewall')
-        print(self._args)
+        fw = RconFirewall()

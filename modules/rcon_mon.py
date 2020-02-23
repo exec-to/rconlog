@@ -5,6 +5,9 @@ from modules.rcon_cli import RconCLI as cli
 from modules.rcon_client import utils
 from modules import rcon_log as logger
 from modules import rcon_core as core
+import socket
+import sys
+import pickle
 
 class RconMonitor():
     def __init__(self, session, args):
@@ -17,7 +20,7 @@ class RconMonitor():
         self.servers = api.list_rcon_server(self.session, self.args, _filter)
 
         for server in self.servers:
-            cli.get_rcon_server(server)
+            # cli.get_rcon_server(server)
             try:
                 ipv4_list = utils.get_ipv4_list(
                     server.rcon_host,
@@ -26,7 +29,7 @@ class RconMonitor():
                     server.rcon_proto)
 
             except Exception as e:
-                logger.logging.error('Critical error with RCON server {id}: {error}'.format(error=str(e),id=server.id))
+                logger.logging.error('Critical error with RCON server ID {id}: {error}'.format(error=str(e),id=server.id))
                 continue
 
             for ip in ipv4_list:
@@ -41,3 +44,4 @@ class RconMonitor():
                     update = core.Updates(server.rcon_host, server.rcon_port,ip,server.id)
                     api.create_rcon_update(self.session, update)
                     logger.logging.info('{ip} created'.format(ip = update.ipaddr, date=update.created_at))
+

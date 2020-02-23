@@ -2,7 +2,8 @@
 # -*- coding: UTF-8 -*-
 
 default = dict(
-    BASE_PATH='/opt/rconlog'
+    BASE_PATH='/opt/rconlog',
+    FW_NAME='firewall_1'
 )
 
 database = dict(

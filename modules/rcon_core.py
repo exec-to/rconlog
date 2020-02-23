@@ -47,6 +47,54 @@ class Updates(Base):
         self.ipaddr = ipaddr
         self.rcon_server_id = rcon_server_id
 
+
+class FirewallRule(Base):
+    __tablename__ = 'firewall_rules'
+    id = Column('id', Integer, primary_key=True, autoincrement=True, nullable=False)
+    gamehost = Column(String(16), nullable=False) # duplicate of rcon_host
+    gameport = Column(Integer, nullable=False, default=0)  # duplicate of rcon_port
+    username = Column(String(10), nullable=False)
+    subnet = Column(String(20), nullable=False)
+    firewall_1 = Column(Boolean, default=False, nullable=False)
+    firewall_2 = Column(Boolean, default=False, nullable=False)
+    firewall_3 = Column(Boolean, default=False, nullable=False)
+    firewall_4 = Column(Boolean, default=False, nullable=False)
+    firewall_5 = Column(Boolean, default=False, nullable=False)
+    firewall_6 = Column(Boolean, default=False, nullable=False)
+    firewall_7 = Column(Boolean, default=False, nullable=False)
+    firewall_8 = Column(Boolean, default=False, nullable=False)
+    firewall_9 = Column(Boolean, default=False, nullable=False)
+    firewall_10 = Column(Boolean, default=False, nullable=False)
+    firewall_11 = Column(Boolean, default=False, nullable=False)
+    firewall_12 = Column(Boolean, default=False, nullable=False)
+    firewall_13 = Column(Boolean, default=False, nullable=False)
+    firewall_14 = Column(Boolean, default=False, nullable=False)
+    firewall_15 = Column(Boolean, default=False, nullable=False)
+    firewall_16 = Column(Boolean, default=False, nullable=False)
+
+    def __init__(self, gamehost, gameport, username, subnet):
+        self.gamehost = gamehost
+        self.gameport = gameport
+        self.username = username
+        self.subnet = subnet
+
+
+class Firewall(Base):
+    __tablename__ = 'firewalls'
+    id = Column('id', Integer, primary_key=True, autoincrement=True, nullable=False)
+    host = Column(String(16), nullable=False)
+    name = Column(String(16), nullable=False)
+    type = Column(String(16), nullable=False, default='iptables')
+    enabled = Column(Boolean, default=False)
+
+    def __init__(self, host, name, type, enabled):
+        self.host = host
+        self.name = name
+        self.type = type
+        self.enabled = enabled
+
+
+
 class Core:
     def __init__(self):
         # logger.logging.info('Init Mysql engine with {con}'.
