@@ -5,9 +5,6 @@ from modules.rcon_cli import RconCLI as cli
 from modules.rcon_client import utils
 from modules import rcon_log as logger
 from modules import rcon_core as core
-import socket
-import sys
-import pickle
 
 class RconMonitor():
     def __init__(self, session, args):

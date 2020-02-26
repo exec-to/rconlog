@@ -23,13 +23,12 @@ class RconParser(object):
             getattr(self, self.mode)()
         else:
             self.args = args # = parser.parse_args(sys.argv[3:])
-            print(self.args)
+            # print(self.args)
 
         self.args.filter = []
 
 
     def stat(self):
-        print('>> stat')
         parser = argparse.ArgumentParser(description='Get RCON statistics')
         parser.add_argument('--verbose', '-v', help='Print statistic in verbose mode', action='store_true')
         args = parser.parse_args(sys.argv[3:])

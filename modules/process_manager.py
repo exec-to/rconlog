@@ -43,4 +43,4 @@ class ProcessManager:
         getattr(cli, cmd)(data)
 
     def firewall(self):
-        fw = RconFirewall()
+        fw = RconFirewall(self.session, self._args)

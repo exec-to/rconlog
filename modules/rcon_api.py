@@ -151,6 +151,25 @@ class RconAPI(object):
     # ------------------
 
     @staticmethod
+    def list_rcon_users(session, args, filter=None):
+        if filter is None:
+            filter = []
+
+        users = None
+        try:
+            users = session.query(core.RconServer.username)
+            users = apply_filters(users, filter)
+            users = users.group_by(core.RconServer.username).all()
+        except Exception as e:
+            logger.logging.error('Can\'t get RCON users: {error}'.format(error=str(e)))
+            print('Can\'t get RCON users: {error}'.format(error=str(e)))
+            exit(1)
+
+        return users
+
+    # ------------------
+
+    @staticmethod
     def create_rcon_server(session, args):
         try:
             server = core.RconServer(args.username,
@@ -376,11 +395,16 @@ class RconAPI(object):
                                              srv.username,
                                              subnet)
                     session.add(rule)
-                    session.commit()
                     logger.logging.info('Create subnet {}'.format(subnet))
                 except Exception as e:
                     logger.logging.error('Can\'t synchronize database: {error}'.format(error=str(e)))
                     exit(1)
+                try:
+                    session.commit()
+                except Exception as e:
+                    logger.logging.error('Can\'t commit changes: {error}'.format(error=str(e)))
+                    exit(1)
+
 
         print('Database successful synchronized')
     # ------------------
