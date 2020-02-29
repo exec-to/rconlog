@@ -17,7 +17,8 @@ class RconMonitor():
         self.servers = api.list_rcon_server(self.session, self.args, _filter)
 
         for server in self.servers:
-            # cli.get_rcon_server(server)
+            cli.get_rcon_server(server)
+            # TODO: Handle socket timeout
             try:
                 ipv4_list = utils.get_ipv4_list(
                     server.rcon_host,

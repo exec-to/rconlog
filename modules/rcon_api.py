@@ -365,10 +365,16 @@ class RconAPI(object):
 
             updates = rules.all()
         except Exception as e:
-            logger.logging.error('Can\'t get firewalls: {error}'.format(error=str(e)))
+            logger.logging.error('Can\'t get firewall rules: {error}'.format(error=str(e)))
             exit(1)
 
         return rules
+
+    @staticmethod
+    def update_rcon_rule(session, id, updates):
+        rule = session.query(core.FirewallRule).filter_by(id=id)
+        for update in updates:
+            rule.update(update, synchronize_session=False)
 
     @staticmethod
     def sync_rcon_db(session, args):

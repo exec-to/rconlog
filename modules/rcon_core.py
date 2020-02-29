@@ -21,6 +21,7 @@ class RconServer(Base):
     rcon_password = Column(String(64), nullable=False)
     rcon_proto = Column(String(4), nullable=False, default='tcp')
     enabled = Column(Boolean, default=False)
+    protected = Column(Boolean, default=True)
     updates = relationship("Updates")
 
     def __init__(self, username, rcon_host, rcon_port, rcon_password, rcon_proto, enabled):
