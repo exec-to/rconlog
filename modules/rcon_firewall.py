@@ -3,8 +3,6 @@
 from modules import rconlog_config as config
 from .rcon_api import RconAPI as api
 from .python_ipset.ipset.wrapper import IPSet
-import xml.etree.ElementTree as ET
-import ipaddress
 from modules import rcon_log as logger
 
 
@@ -81,7 +79,7 @@ class RconFirewall():
             self.session.commit()
 
         # TODO: implement cli for add custom subnets
-        rcon_custom = IPSet(set_name="rcon-custom", set_type="hash:ip", set_family="inet", netmask=24, ignore_existing=True)
+        # rcon_custom = IPSet(set_name="rcon-custom", set_type="hash:net", set_family="inet", ignore_existing=True)
         # import iptables module
 
         # load custom subnets (steam, internal)

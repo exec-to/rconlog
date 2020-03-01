@@ -79,6 +79,14 @@ class FirewallRule(Base):
         self.username = username
         self.subnet = subnet
 
+class CustomSubnet(Base):
+    __tablename__ = 'custom_subnets'
+    id = Column('id', Integer, primary_key=True, autoincrement=True, nullable=False)
+    subnet = Column(String(20), nullable=False)
+
+    def __init__(self, subnet):
+        self.subnet = subnet
+
 
 class Firewall(Base):
     __tablename__ = 'firewalls'

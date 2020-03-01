@@ -6,10 +6,35 @@ from modules import rcon_log as logger
 import getpass
 from sqlalchemy_filters import apply_filters
 from modules.rcon_client import utils
+import glob, os
+from modules import rconlog_config as config
 
 # TODO: Implement filters
 
+
 class RconAPI(object):
+
+    @staticmethod
+    def load_custom_subnets(session):
+        net_dir = config.default['FW_CUSTOM_PATH']
+        os.chdir(net_dir)
+        for file in glob.glob("*.net"):
+            abs_fname = "{}/{}".format(net_dir,file)
+            with open(abs_fname) as f:
+                for net in f:
+                    # add net to custom_subnets
+                    try:
+                        subnet = core.CustomSubnet(net)
+                        session.add(subnet)
+                    except Exception as e:
+                        logger.logging.error('Can\'t create custom subnet: {error}'.format(error=str(e)))
+                        print('Can\'t create custom subnet: {error}'.format(error=str(e)))
+                        exit(1)
+
+        session.commit()
+
+        return 'Created successful'
+
 
     @staticmethod
     def del_rcon_server(session, args):
@@ -339,7 +364,6 @@ class RconAPI(object):
 
         return 'Server {id} successful disabled'.format(id=f.id)
 
-
     # -- Database methods
     @staticmethod
     def get_rcon_rule(session, args):
@@ -377,6 +401,23 @@ class RconAPI(object):
             rule.update(update, synchronize_session=False)
 
     @staticmethod
+    def create_firewall_rule(session, args, commit=True):
+        try:
+            rule = core.FirewallRule(args.gamehost,
+                                     args.gameport,
+                                     args.username,
+                                     args.subnet)
+            session.add(rule)
+            if commit:
+                session.commit()
+            logger.logging.info('Create subnet {}'.format(subnet))
+        except Exception as e:
+            logger.logging.error('Can\'t synchronize database: {error}'.format(error=str(e)))
+            exit(1)
+
+        return 'Created successful'
+
+    @staticmethod
     def sync_rcon_db(session, args):
         # get updates
         updates = RconAPI.list_rcon_updates(session, args)
@@ -395,12 +436,12 @@ class RconAPI(object):
             subnet = '{}.0/24'.format('.'.join(str(ip.ipaddr).split('.')[:3]))
             if not subnet in rules_list:
                 srv = next(server for server in servers if server.id == ip.rcon_server_id)
+                rule = core.FirewallRule(ip.gamehost,
+                                         ip.gameport,
+                                         srv.username,
+                                         subnet)
                 try:
-                    rule = core.FirewallRule(ip.gamehost,
-                                             ip.gameport,
-                                             srv.username,
-                                             subnet)
-                    session.add(rule)
+                    RconAPI.create_firewall_rule(session, rule, commit=False)
                     logger.logging.info('Create subnet {}'.format(subnet))
                 except Exception as e:
                     logger.logging.error('Can\'t synchronize database: {error}'.format(error=str(e)))
@@ -411,6 +452,8 @@ class RconAPI(object):
                     logger.logging.error('Can\'t commit changes: {error}'.format(error=str(e)))
                     exit(1)
 
+        # load custom subnets to database
+        RconAPI.load_custom_subnets(session)
 
         print('Database successful synchronized')
     # ------------------

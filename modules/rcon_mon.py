@@ -6,6 +6,7 @@ from modules.rcon_client import utils
 from modules import rcon_log as logger
 from modules import rcon_core as core
 
+
 class RconMonitor():
     def __init__(self, session, args):
         self.args = args
