@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 import sqlalchemy as db
 from modules import rconlog_config as config
@@ -101,7 +101,6 @@ class Firewall(Base):
         self.name = name
         self.type = type
         self.enabled = enabled
-
 
 
 class Core:

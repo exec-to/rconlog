@@ -8,6 +8,7 @@ from sqlalchemy_filters import apply_filters
 from modules.rcon_client import utils
 import glob, os
 from modules import rconlog_config as config
+import ipaddress
 
 # TODO: Implement filters
 
@@ -16,24 +17,50 @@ class RconAPI(object):
 
     @staticmethod
     def load_custom_subnets(session):
+        subnets = []
+        try:
+            _subnets = session.query(core.CustomSubnet.subnet).all()
+            subnets = [value for value, in _subnets]
+        except Exception as e:
+            logger.logging.error('Can\'t get custom subnets: {error}'.format(error=str(e)))
+            exit(1)
+
         net_dir = config.default['FW_CUSTOM_PATH']
-        os.chdir(net_dir)
-        for file in glob.glob("*.net"):
-            abs_fname = "{}/{}".format(net_dir,file)
-            with open(abs_fname) as f:
-                for net in f:
-                    # add net to custom_subnets
-                    try:
-                        subnet = core.CustomSubnet(net)
-                        session.add(subnet)
-                    except Exception as e:
-                        logger.logging.error('Can\'t create custom subnet: {error}'.format(error=str(e)))
-                        print('Can\'t create custom subnet: {error}'.format(error=str(e)))
-                        exit(1)
+
+        try:
+            os.chdir(net_dir)
+            for file in glob.glob("*.net"):
+                abs_fname = "{}/{}".format(net_dir,file)
+                with open(abs_fname) as f:
+                    for net in f:
+                        ip_net = ipaddress.ip_network(net.rstrip())
+                        if not str(ip_net) in subnets:
+                            subnet = core.CustomSubnet(str(ip_net))
+                            session.add(subnet)
+        except Exception as e:
+            logger.logging.error('Can\'t parse custom subnets: {error}'.format(error=str(e)))
 
         session.commit()
 
-        return 'Created successful'
+        return 'Subnets loaded successful'
+
+    @staticmethod
+    def list_custom_subnets(session, args=None, filter=None):
+        if filter is None:
+            filter = []
+
+        subnets = None
+        try:
+            subnets = session.query(core.CustomSubnet)
+            subnets = apply_filters(subnets, filter)
+            subnets = subnets.all()
+        except Exception as e:
+            err_msg = 'Can\'t get custom subnets: {error}'.format(error=str(e))
+            logger.logging.error(err_msg)
+            print(err_msg)
+            exit(1)
+
+        return subnets
 
 
     @staticmethod
@@ -150,10 +177,14 @@ class RconAPI(object):
 
     # ------------------
 
+    # TODO: replace attrs to filter
     @staticmethod
     def list_rcon_server(session, args, filter=None):
         if filter is None:
             filter = []
+
+        if args is None:
+            args = []
 
         servers = None
         try:
@@ -248,7 +279,7 @@ class RconAPI(object):
         return u
 
     @staticmethod
-    def create_rcon_update(session, args):
+    def create_rcon_update(session, args, commit=True):
         try:
             update = core.Updates(
                 args.gamehost,
@@ -257,7 +288,8 @@ class RconAPI(object):
                 args.rcon_server_id)
 
             session.add(update)
-            session.commit()
+            if commit:
+                session.commit()
         except Exception as e:
             logger.logging.error('Can\'t create RCON update record: {error}'.format(error=str(e)))
             print('Can\'t create RCON update record: {error}'.format(error=str(e)))
@@ -386,10 +418,12 @@ class RconAPI(object):
         try:
             rules = session.query(core.FirewallRule)
             rules = apply_filters(rules, filter)
+            rules = rules.all()
 
-            updates = rules.all()
         except Exception as e:
-            logger.logging.error('Can\'t get firewall rules: {error}'.format(error=str(e)))
+            err_msg = 'Can\'t get firewall rules: {error}'.format(error=str(e))
+            logger.logging.error(err_msg)
+            print(err_msg)
             exit(1)
 
         return rules
@@ -410,9 +444,9 @@ class RconAPI(object):
             session.add(rule)
             if commit:
                 session.commit()
-            logger.logging.info('Create subnet {}'.format(subnet))
+            logger.logging.info('Create subnet {}'.format(args.subnet))
         except Exception as e:
-            logger.logging.error('Can\'t synchronize database: {error}'.format(error=str(e)))
+            logger.logging.error('Can\'t create firewall rule: {error}'.format(error=str(e)))
             exit(1)
 
         return 'Created successful'
