@@ -3,7 +3,7 @@
 import argparse
 from modules import rcon_log as logger
 from modules import process_manager
-import sys
+import os, sys
 from modules.rcon_parser import RconParser as Parser
 
 #                          RCON-based logger application
@@ -19,9 +19,23 @@ from modules.rcon_parser import RconParser as Parser
 def main():
     parser = Parser()
 
-    logger.logging.info('Starting rconlog in %s mode.', parser.mode)
-    pm = process_manager.ProcessManager(parser.mode, parser.args)
-    pm.run()
+    pid = str(os.getpid())
+    pidfile = "/tmp/rcon_{mode}.pid".format(mode=parser.mode)
+
+    if os.path.isfile(pidfile):
+        logger.logging.info("%s already exists, exiting", pidfile)
+        sys.exit()
+
+    with open(pidfile, 'w') as f:
+        f.write(pid)
+
+    try:
+        logger.logging.info('Starting rconlog in %s mode.', parser.mode)
+        pm = process_manager.ProcessManager(parser.mode, parser.args)
+        pm.run()
+
+    finally:
+        os.unlink(pidfile)
 
 
 if __name__ == '__main__':

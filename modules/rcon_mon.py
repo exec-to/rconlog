@@ -15,6 +15,8 @@ class RconMonitor():
             {'field': 'enabled', 'op': '==', 'value': True}
         ]
 
+        logger.logging.info('Start monitor')
+
         self.servers = api.list_rcon_server(self.session, self.args, _filter)
 
         for server in self.servers:

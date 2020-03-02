@@ -213,9 +213,9 @@ class RconAPI(object):
 
         users = None
         try:
-            users = session.query(core.RconServer.username)
+            users = session.query(core.RconServer.username,core.RconServer.enabled,core.RconServer.protected)
             users = apply_filters(users, filter)
-            users = users.group_by(core.RconServer.username).all()
+            users = users.group_by(core.RconServer.username,core.RconServer.enabled,core.RconServer.protected).all()
         except Exception as e:
             logger.logging.error('Can\'t get RCON users: {error}'.format(error=str(e)))
             print('Can\'t get RCON users: {error}'.format(error=str(e)))
@@ -296,6 +296,23 @@ class RconAPI(object):
             exit(1)
 
         return 'Created successful'
+
+    @staticmethod
+    def flush_user_rules(session, username):
+        fw_name = config.default['FW_NAME']
+
+        _filter = [
+            {'field': 'username', 'op': '==', 'value': username},
+        ]
+        try:
+            rules = session.query(core.FirewallRule)
+            rules = apply_filters(rules, _filter)
+            rules.update({fw_name: False}, synchronize_session=False)
+            session.commit()
+        except Exception as e:
+            msg_error = 'Can\'t flush firewall rules: {error}'.format(error=str(e))
+            logger.logging.error(msg_error)
+            exit(1)
 
 
     @staticmethod

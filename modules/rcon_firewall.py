@@ -26,6 +26,7 @@ class RconFirewall():
             fw = IptablesFirewall(self._fw_name, self.session)
             fw.update_users_ipsets()
             fw.update_custom_ipsets()
+            fw.verify_users_iptables()
         else:
             pass
 
