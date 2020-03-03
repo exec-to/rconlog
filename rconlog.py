@@ -35,6 +35,7 @@ def main():
         pm.run()
 
     finally:
+        logger.logging.info('Exiting %s mode.', parser.mode)
         os.unlink(pidfile)
 
 
