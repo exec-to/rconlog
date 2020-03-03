@@ -1,11 +1,14 @@
+cffi==1.14.0
 chardet==2.3.0
 command-not-found==0.3
 language-selector==0.1
 mysql-connector==2.2.9
+pycparser==2.19
 pycurl==7.43.0
 pygobject==3.20.0
 python-apt==1.1.0b1+ubuntu0.16.4.8
 python-debian==0.1.27
+python-iptables==0.14.0
 python-systemd==231
 requests==2.9.1
 six==1.10.0

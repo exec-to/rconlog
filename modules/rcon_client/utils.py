@@ -1,15 +1,25 @@
 from modules.rcon_client import mcrcon
+from modules import rcon_log as logger
 import socket
 import re
 
 def send_rcon_command(host, port, passwd, proto, cmd):
-    sock = None
-    if proto == 'tcp':
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    elif proto == 'udp':
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    sock.connect((host, port))
+    sock = None
+    try:
+        if proto == 'tcp':
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        elif proto == 'udp':
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+
+        sock.settimeout(None)
+        sock.connect((host, port))
+
+    except Exception as e:
+        logger.logging.error('Can\'t connect to RCON server {host}:{port}. Error: {err}'
+                             .format(host=host, port=port, err=str(e)))
+
 
     try:
         # Log in
@@ -38,10 +48,10 @@ def get_ipv4_list(host, port, passwd, proto):
     return ipv4_list
 
 
-def extract_ipv4(raw_input, exclude='127.0.0.1'):
+def extract_ipv4(raw_input, exclude_ip='127.0.0.1'):
     ipv4_list = []
 
-    ignore_list = ['0.0.0.0', '1.37.4.0', '1.1.2.7', '255.255.255.255', exclude]
+    ignore_list = ['0.0.0.0', '1.37.4.0', '1.1.2.7', '255.255.255.255', exclude_ip]
 
     for entry in raw_input.split('\n'):
         match = re.search(r'((?:\d{1,3}[.]){3}\d{1,3})', entry)

@@ -105,11 +105,7 @@ class Firewall(Base):
 
 class Core:
     def __init__(self):
-        # logger.logging.info('Init Mysql engine with {con}'.
-        #                   format(con='mysql+mysqlconnector://{user}:{passwd}@{host}:{port}/{db}'
-        #                          .format_map(config.database)))
-
         self.engine = db.create_engine('mysql+mysqlconnector://{user}:{passwd}@{host}:{port}/{db}'
-                                       .format_map(config.database), echo=False)
+                                       .format_map(config.database), echo=False, connect_args={'connect_timeout': 10})
 
         Base.metadata.create_all(self.engine)

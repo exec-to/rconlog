@@ -66,6 +66,12 @@ class RconParser(object):
         server_disable = cmd_server.add_parser('disable', help='Disable RCON server')
         server_disable.add_argument('id', help='rcon server id')
 
+        server_protect = cmd_server.add_parser('protect', help='Set protect property for RCON server')
+        server_protect.add_argument('protected', choices={'on', 'off'}, help='protected state')
+        server_protect.add_argument('id', help='rcon server id')
+
+        # TODO: db clean - clean old data for removed users
+
         server_get = cmd_server.add_parser('get', help='Get RCON server')
         server_get.add_argument('id', help='rcon server id')
 

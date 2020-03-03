@@ -13,8 +13,11 @@ class ProcessManager:
     def __init__(self, mode, args):
         self._mode = mode
         self._args = args
-        self.core = rcon_core.Core()
-        self.session = sessionmaker(bind=self.core.engine)()
+        try:
+            self.core = rcon_core.Core()
+            self.session = sessionmaker(bind=self.core.engine)()
+        except Exception as e:
+            logger.logging.error('Can\'t initialize process manager. Error: {}'.format(str(e)))
 
     def run(self):
         if hasattr(self, self._mode):

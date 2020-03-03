@@ -23,7 +23,6 @@ class IptablesFirewall:
             dst_setname = "{}-dst".format(user.username)
             dst_ipset = IPSet(set_name=dst_setname, set_type="hash:ip", set_family="inet", ignore_existing=True)
 
-            # TODO: Implement cli for set protected property
             _filter = [
                 {'field': 'username', 'op': '==', 'value': user.username},
                 {'field': 'enabled', 'op': '==', 'value': True},
@@ -69,7 +68,6 @@ class IptablesFirewall:
             self.session.commit()
 
     def update_custom_ipsets(self):
-        # TODO: implement cli for add custom subnets
         rcon_custom = IPSet(set_name="rcon-custom", set_type="hash:net", set_family="inet", ignore_existing=True)
         subnets = api.list_custom_subnets(self.session)
         for subnet in subnets:
@@ -163,8 +161,7 @@ class IptablesFirewall:
                                       ignore_existing=True)
                     src_ipset.destroy()
 
-                    #TODO: api.flush_rules(user)
-
+                    # flush user rules
                     logger.logging.info('Flush rules')
                     api.flush_user_rules(self.session, uname)
 

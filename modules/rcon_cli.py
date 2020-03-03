@@ -10,8 +10,14 @@ class RconCLI(object):
             return
         print('')
         print('RCON Server ID: {id}'.format(id=s.id))
-        print('Host: {host}:{port} ({proto}), User: {user}, Active: {state}'
-              .format(host=s.rcon_host, port=s.rcon_port, proto=s.rcon_proto, user=s.username, state=s.enabled))
+        print('host: {host}:{port} ({proto}), user: {user}, enabled: {state}, protected: {protected}'
+              .format(host=s.rcon_host,
+                      port=s.rcon_port,
+                      proto=s.rcon_proto,
+                      user=s.username,
+                      state=s.enabled,
+                      protected=s.protected
+                      ))
         print('--'*30)
 
     @staticmethod
@@ -77,6 +83,10 @@ class RconCLI(object):
 
     @staticmethod
     def disable_rcon_firewall(message):
+        print(message)
+
+    @staticmethod
+    def protect_rcon_server(message):
         print(message)
 
     @staticmethod

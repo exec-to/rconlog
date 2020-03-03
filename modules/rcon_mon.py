@@ -21,7 +21,6 @@ class RconMonitor():
 
         for server in self.servers:
             # cli.get_rcon_server(server)
-            # TODO: Handle socket timeout
             try:
                 ipv4_list = utils.get_ipv4_list(
                     server.rcon_host,
@@ -63,7 +62,6 @@ class RconMonitor():
                         api.create_firewall_rule(self.session, rule, commit=False)
 
         self.session.commit()
-
 
         # load custom subnets to database
         api.load_custom_subnets(self.session)

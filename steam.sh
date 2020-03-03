@@ -3,4 +3,4 @@
 #   get steam ip ranges   #
 # # # # # # # # # # # # # # 
 
-whois -h whois.radb.net -- '-i origin AS32590' | grep 'route:' | awk '{print $2}' | sort -u > /opt/rconlog/var/custom/steam.net
+/usr/bin/whois -h whois.radb.net -- '-i origin AS32590' | grep 'route:' | awk '{print $2}' | sort -u > /opt/rconlog/var/custom/steam.net

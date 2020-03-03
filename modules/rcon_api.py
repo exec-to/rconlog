@@ -27,18 +27,23 @@ class RconAPI(object):
 
         net_dir = config.default['FW_CUSTOM_PATH']
 
-        try:
-            os.chdir(net_dir)
-            for file in glob.glob("*.net"):
+        os.chdir(net_dir)
+        for file in glob.glob("*.net"):
+            try:
                 abs_fname = "{}/{}".format(net_dir,file)
                 with open(abs_fname) as f:
                     for net in f:
-                        ip_net = ipaddress.ip_network(net.rstrip())
-                        if not str(ip_net) in subnets:
-                            subnet = core.CustomSubnet(str(ip_net))
-                            session.add(subnet)
-        except Exception as e:
-            logger.logging.error('Can\'t parse custom subnets: {error}'.format(error=str(e)))
+                        try:
+                            ip_net = ipaddress.ip_network(net.rstrip())
+                            if not str(ip_net) in subnets:
+                                subnet = core.CustomSubnet(str(ip_net))
+                                session.add(subnet)
+                        except Exception as e:
+                            logger.logging.error('Can\'t parse custom subnet: {error}'.format(error=str(e)))
+                            continue
+            except Exception as e:
+                logger.logging.error('Can\'t parse custom subnet file: {error}'.format(error=str(e)))
+                continue
 
         session.commit()
 
@@ -174,6 +179,23 @@ class RconAPI(object):
             exit(1)
 
         return 'Server {id} successful disabled'.format(id=s.id)
+
+    # ------------------
+
+    @staticmethod
+    def protect_rcon_server(session, args):
+        s = None
+        try:
+            s = session.query(core.RconServer).filter_by(id=args.id).first()
+            s.protected = args.protected.lower() == 'on'
+            session.commit()
+        except Exception as e:
+            msg_error = 'Can\'t set protect property to RCON server: {error}'.format(error=str(e))
+            logger.logging.error(msg_error)
+            print(msg_error)
+            exit(1)
+
+        return 'Server {id} protect set successful'.format(id=s.id)
 
     # ------------------
 
