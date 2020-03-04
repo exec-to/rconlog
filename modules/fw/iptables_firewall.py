@@ -55,8 +55,8 @@ class IptablesFirewall:
                 # get only new rules
                 _filter = [
                     {'field': 'username', 'op': '==', 'value': user.username},
-                    {'field': 'gamehost', 'op': '==', 'value': server.rcon_host},
-                    {'field': 'gameport', 'op': '==', 'value': server.rcon_port},
+                    # {'field': 'gamehost', 'op': '==', 'value': server.rcon_host},
+                    # {'field': 'gameport', 'op': '==', 'value': server.rcon_port},
                     {'field': self.name, 'op': '==', 'value': False}
                 ]
 

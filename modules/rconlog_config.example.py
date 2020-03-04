@@ -3,14 +3,16 @@
 
 default = dict(
     BASE_PATH='/opt/rconlog',
-    FW_NAME='firewall_1'
+    FW_NAME='firewall_2',
+    FW_CUSTOM_PATH='/opt/rconlog/var/custom'
 )
 
 database = dict(
-    host='localhost',
-    port=3306,
-    db='rcondb',
     user='user',
-    passwd='pass'
-
+    passwd='pass',
+    host='127.0.0.1',
+    port='3306',
+    db='dbname'
 )
+
+

@@ -84,7 +84,7 @@ def login(sock, password, proto):
         data, _ = sock.recvfrom(4096)
         state['login'] = data[:4] == b"\xFF\xFF\xFF\xFF"
         if state['login']:
-            state['master_key'] = data[4:-2].decode("utf-8").split(' ')[2]
+            state['master_key'] = data[4:-2].decode("utf-8", "replace").split(' ')[2]
 
     return state
 
@@ -101,7 +101,7 @@ def command(sock, text):
         if packet.ident != 0:
             break
         response += packet.payload
-    return response.decode("utf8")
+    return response.decode("utf8", "replace")
 
 def udp_command(sock, cmd, master_key, password):
     """
@@ -119,4 +119,4 @@ def udp_command(sock, cmd, master_key, password):
     recv, _ = sock.recvfrom(4096)
     response = recv[5:-2]
 
-    return response.decode("utf8")
+    return response.decode("utf8", "replace")
