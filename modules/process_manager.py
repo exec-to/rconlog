@@ -33,7 +33,6 @@ class ProcessManager:
         print('run server')
 
     def monitor(self):
-        print('run monitor')
         # TODO: argparse filter [stote_const] append filter
         RconMonitor(self.session, self._args)
 

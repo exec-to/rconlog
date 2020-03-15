@@ -12,14 +12,12 @@ def send_rcon_command(host, port, passwd, proto, cmd):
         elif proto == 'udp':
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-
         sock.settimeout(None)
         sock.connect((host, port))
 
     except Exception as e:
         logger.logging.error('Can\'t connect to RCON server {host}:{port}. Error: {err}'
                              .format(host=host, port=port, err=str(e)))
-
 
     try:
         # Log in
@@ -30,13 +28,14 @@ def send_rcon_command(host, port, passwd, proto, cmd):
 
         request = cmd
         response = ''
-
+        logger.logging.debug('rcon run cmd {}'.format(request))
         if proto == 'tcp':
             response = mcrcon.command(sock, request)
         elif proto == 'udp':
             response = mcrcon.udp_command(sock, request, data['master_key'], passwd)
 
     finally:
+        logger.logging.debug('rcon close socket')
         sock.close()
 
     return response

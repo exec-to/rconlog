@@ -107,6 +107,8 @@ def udp_command(sock, cmd, master_key, password):
     """
     Sends a "command" packet to the server. Returns the response as a string.
     """
+    end_with = bytearray(b' users\n\x00\x00')
+
     command = bytearray([255, 255, 255, 255])
     command.extend(b"rcon ")
     command.extend(master_key.encode())
@@ -118,5 +120,9 @@ def udp_command(sock, cmd, master_key, password):
 
     recv, _ = sock.recvfrom(4096)
     response = recv[5:-2]
+
+    while recv[-9:] != end_with:
+        recv, _ = sock.recvfrom(4096)
+        response = response + recv
 
     return response.decode("utf8", "replace")

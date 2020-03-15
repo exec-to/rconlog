@@ -9,6 +9,7 @@ from modules import rcon_core as core
 
 class RconMonitor():
     def __init__(self, session, args):
+        logger.logging.debug('monitor __init__')
         self.args = args
         self.session = session
         _filter = [
@@ -20,6 +21,7 @@ class RconMonitor():
         self.servers = api.list_rcon_server(self.session, self.args, _filter)
 
         for server in self.servers:
+            logger.logging.debug('rcon get {}:{}'.format(server.rcon_host, server.rcon_port))
             # cli.get_rcon_server(server)
             try:
                 ipv4_list = utils.get_ipv4_list(
@@ -43,7 +45,7 @@ class RconMonitor():
                 if not update:
                     update = core.Updates(server.rcon_host, server.rcon_port, ip, server.id)
                     api.create_rcon_update(self.session, update, commit=False)
-                    # logger.logging.info('{ip} created'.format(ip = update.ipaddr, date=update.created_at))
+                    logger.logging.debug('{ip} created'.format(ip = update.ipaddr, date=update.created_at))
 
                     subnet = '{}.0/24'.format('.'.join(str(ip).split('.')[:3]))
                     _filter = [
